@@ -36,24 +36,27 @@ description: Automatically configure Python project environments — install dep
 `python:<version>` 追加后缀：`-mirrors`（配置镜像源） `-bootstrap`（安装基础构建工具）
 示例：`python:3.10-mirrors-bootstrap`
 
-### 换源（优先执行）
+### ⚡ 第一步：配置镜像源（优先执行，节省流量）
 
-配置 PyPI 和 Ubuntu 镜像源加速安装：
+先跑一键镜像配置脚本，将 PyPI 和 Ubuntu apt 切换为 TUNA 清华镜像源：
 
 ```bash
-# PyPI 清华源
-pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
-
-# apt 清华源（Debian）
-sed -i 's|deb.debian.org|mirrors.tuna.tsinghua.edu.cn|g; s|security.debian.org|mirrors.tuna.tsinghua.edu.cn|g' /etc/apt/sources.list
-apt-get update
+bash scripts/setup_mirrors.sh
 ```
+
+这个脚本会自动检测是否有 sudo，无 sudo 环境至少会配好 PyPI 源。
 
 ---
 
 ## 启动流程
 
 到一个新仓库后，**按顺序执行以下步骤：**
+
+### 0. 先配镜像源（节省外网流量）
+
+```bash
+bash scripts/setup_mirrors.sh
+```
 
 ### 1. 了解项目结构
 
@@ -62,6 +65,8 @@ ls -la
 ```
 
 ### 2. 查看依赖文件
+
+> ⚠️ 在进行步骤 0 配好镜像源之前，**不要**执行后续任何步骤。
 
 ```bash
 python scripts/dependency_analysis.py /repo
@@ -239,6 +244,7 @@ git submodule update --init --recursive
 | `scripts/dependency_analysis.py` | 分析项目依赖文件结构 | `python scripts/dependency_analysis.py <repo_path>` |
 | `scripts/pypi_time_travel.py` | 查某包在历史时间点的版本 | `python scripts/pypi_time_travel.py <pkg_name> <repo_path>` |
 | `scripts/github_time_travel.py` | 查某 GitHub 仓库的历史 commit | `python scripts/github_time_travel.py <owner/repo> <repo_path>` |
+| `scripts/setup_mirrors.sh` | 一键配置 TUNA 清华镜像源（PyPI + apt） | `bash scripts/setup_mirrors.sh` |
 
 ---
 
