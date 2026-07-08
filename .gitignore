@@ -1,7 +1,6 @@
+*.log
+*.bak
 __pycache__/
 *.pyc
-.venv/
-venv/
+run_wrapper.sh
 .DS_Store
-*.swp
-*.swo
