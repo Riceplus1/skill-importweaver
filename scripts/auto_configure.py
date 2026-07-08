@@ -315,7 +315,8 @@ def shlex_quote(s: str) -> str:
         return '""'
     if re.match(r'^[a-zA-Z0-9_./-]+$', s):
         return s
-    return f"'{s.replace(\"'\", \"'\\\\''\")}'"
+    escaped = s.replace("'", "'\\''")
+    return f"'{escaped}'"
 
 
 if __name__ == "__main__":
