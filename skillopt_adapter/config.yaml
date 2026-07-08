@@ -1,0 +1,65 @@
+# SkillOpt training config — HarborEnvAdapter × Multi-Docker-Eval.
+#
+# Usage:
+#   python run_skillopt.py skillopt_adapter/config.yaml
+#
+# Sections:
+#   model       — backend & LLM for the optimizer (reflect / analyst)
+#   train       — training loop hyper-parameters
+#   gradient    — minibatch reflect settings
+#   optimizer   — patch generation / edit budget
+#   evaluation  — gate (validation) config
+#   env         — environment-specific: forwarded to HarborEnvAdapter
+
+model:
+  # Optimizer backend: which LLM analyses trajectories & proposes patches.
+  #   "openai_chat" — uses OpenAI-compatible API (right.codes proxy)
+  #   "claude_chat" — uses Claude CLI (not available on this host)
+  backend: openai_chat
+  optimizer: deepseek-v4-pro
+  target: deepseek-v4-pro
+
+train:
+  num_epochs: 3
+  batch_size: 4            # tasks per rollout batch
+  train_size: 20           # total tasks reserved for training
+  steps_per_epoch: 2       # batches per epoch (overridden by dataloader)
+  seed: 42
+  accumulation: 1          # gradient accumulation steps
+
+gradient:
+  minibatch_size: 4        # trajectories per minibatch for the analyst
+  merge_batch_size: 4      # patch merge batch size
+  analyst_workers: 4       # parallel analyst calls
+  failure_only: false      # also analyse success trajectories
+
+optimizer:
+  learning_rate: 4         # max edits per update (edit budget)
+  lr_control_mode: fixed
+  skill_update_mode: patch
+
+evaluation:
+  use_gate: true
+  gate_metric: hard
+  sel_env_num: 5           # tasks in validation gate
+  test_env_num: 5          # tasks in test evaluation
+  eval_test: true          # also run test split at the end
+
+env:
+  name: multi-docker-eval
+  skill_init: /home/panly/cjy_data/skill-importweaver/SKILL.md
+  out_root: /home/panly/cjy_data/skillopt-runs
+
+  # --- HarborEnvAdapter-specific ---
+  harbor_bin: /home/panly/.local/bin/harbor
+  task_dir: /home/panly/cjy_data/harbor/datasets/multi-docker-eval
+  agent_name: claude-code
+  model: deepseek-v4-pro
+  n_concurrent: 4
+  task_timeout: 1800
+  agent_setup_timeout_multiplier: 3
+  split_path: /home/panly/cjy_data/harbor/datasets/multi-docker-eval/skillopt_split_python.json
+  train_size: 20
+  val_size: 5
+  test_size: 5
+  seed: 42
