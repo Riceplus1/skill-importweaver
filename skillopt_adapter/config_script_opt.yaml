@@ -1,0 +1,58 @@
+# SkillOpt training config — Script optimization for heuristic_env_setup.py.
+#
+# Optimizes a Python script (heuristic_env_setup.py) instead of SKILL.md text.
+# Uses the heuristic-env agent (no LLM) for rollout.
+model:
+  backend: openai_chat
+  optimizer: deepseek-v4-pro
+  target: deepseek-v4-pro
+
+train:
+  num_epochs: 1
+  batch_size: 4
+  train_size: 20
+  steps_per_epoch: 2
+  seed: 42
+  accumulation: 1
+
+gradient:
+  minibatch_size: 4
+  merge_batch_size: 4
+  analyst_workers: 4
+  failure_only: false
+
+optimizer:
+  learning_rate: 4
+  lr_control_mode: fixed
+  # full_rewrite_minibatch: analyst outputs a complete script, not patches
+  skill_update_mode: full_rewrite_minibatch
+
+evaluation:
+  use_gate: true
+  gate_metric: hard
+  sel_env_num: 5
+  test_env_num: 5
+  eval_test: true
+
+env:
+  name: script-optimizer
+  skill_init: /home/panly/cjy_data/skill-importweaver/scripts/heuristic_env_setup.py
+  out_root: /home/panly/cjy_data/skillopt-script-runs
+
+  # HarborEnvAdapter-specific
+  harbor_bin: /home/panly/.local/bin/harbor
+  task_dir: /home/panly/cjy_data/harbor/datasets/menvbench
+  agent_name: heuristic-env
+  # model: not needed for script agent
+  n_concurrent: 4
+  task_timeout: 1800
+  agent_setup_timeout_multiplier: 3
+  split_path: /home/panly/cjy_data/harbor/datasets/menvbench/skillopt_split_python.json
+  train_size: 20
+  val_size: 5
+  test_size: 5
+  seed: 42
+
+  # Task metadata source
+  dataset_name: ernie-research/MEnvBench
+  language_filter: Python
